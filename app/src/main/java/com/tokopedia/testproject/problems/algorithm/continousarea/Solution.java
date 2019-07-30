@@ -19,7 +19,6 @@ public class Solution {
         // below is stub
         Solution.matrix = matrix;
         return searchMaxContinuousArea();
-        //return 0;
     }
 
     private static Integer searchMaxContinuousArea(){
@@ -37,7 +36,10 @@ public class Solution {
     }
 
     private static void directions(int i, int j){
+        move(i,j,i,j-1);
         move(i,j,i,j+1);
+        move(i,j,i-1,j);
+        move(i,j,i+1,j);
     }
 
     private static void move(int x, int y, int newX, int newY){

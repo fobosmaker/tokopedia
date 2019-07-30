@@ -36,7 +36,7 @@ public class Solution {
         }
         int bestResult = Collections.max(arrResult);
         Log.i(TAG, "searchMaxContinuousArea: value="+bestResult);
-        return 0;
+        return bestResult;
     }
 
     private static void getSquareLength(int i,int j){
