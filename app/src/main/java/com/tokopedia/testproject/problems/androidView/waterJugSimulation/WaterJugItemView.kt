@@ -11,13 +11,16 @@ class WaterJugItemView(context: Context) : FrameLayout(context) {
     init {
         LayoutInflater.from(context).inflate(R.layout.item_jug_simulation,
                 this, true)
+
     }
 
     fun setData(text: String, jug1: Int, jug1Max: Int, jug2: Int, jug2Max: Int) {
         tv_desription.setText(text)
         water_jug1.setMaxWater(jug1Max)
         water_jug1.setWaterFill(jug1)
+        water_jug1.drawJug(1)
         water_jug2.setMaxWater(jug2Max)
         water_jug2.setWaterFill(jug2)
+        water_jug2.drawJug(2)
     }
 }
