@@ -11,6 +11,6 @@ public class Solution {
     }
 
     private static int searchContinuous(){
-        return 0;
+        return 1;
     }
 }
