@@ -39,7 +39,6 @@ class WaterJugSimulationActivity : AppCompatActivity() {
             val jug2Max = et_jug_2.text.toString().toInt()
             val target = et_target.text.toString().toInt()
             val list: List<WaterJugAction> = simulateWaterJug(jug1Max, jug2Max, target)
-
             waterJugSimulationAdapter.setData(generateState(list, jug1Max, jug2Max), jug1Max, jug2Max, target)
             waterJugSimulationAdapter.notifyDataSetChanged()
         }

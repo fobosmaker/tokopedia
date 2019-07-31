@@ -51,7 +51,7 @@ public class WaterJugView extends View {
     public void drawJug(int jug){
         switch (jug){
             case 1:
-                if(waterFill != 0){
+                if(waterFill != 0 && maxWater != 0){
                     //Log.d(TAG, "drawJug"+jug+": max="+maxWater+" fill"+waterFill+" percentage:" + maxWater/waterFill);
                     mRect.left = JUG_1_DIMENS * (2/maxWater);
                     mRect.top = JUG_1_DIMENS;
@@ -61,7 +61,7 @@ public class WaterJugView extends View {
                 }
                 break;
             case 2:
-                if(waterFill != 0) {
+                if(waterFill != 0 && maxWater != 0) {
                     Log.d(TAG, "drawJug"+jug+": max="+maxWater+" fill"+waterFill+" percentage:" + maxWater/waterFill);
                     mRect.left = JUG_2_DIMENS * (waterFill/maxWater*100);
                     mRect.top = JUG_2_DIMENS;
