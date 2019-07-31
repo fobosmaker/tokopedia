@@ -74,9 +74,12 @@ public class GraphActivity extends AppCompatActivity {
                         viewHolder.cardView.setBackgroundColor(Color.RED);
                         break;
                     case 1:
-                        viewHolder.cardView.setBackgroundColor(Color.GREEN);
+                        viewHolder.cardView.setBackgroundColor(Color.YELLOW);
                         break;
                     case 2:
+                        viewHolder.cardView.setBackgroundColor(Color.GREEN);
+                        break;
+                    default:
                         viewHolder.cardView.setBackgroundColor(Color.BLUE);
                         break;
 
@@ -109,54 +112,28 @@ public class GraphActivity extends AppCompatActivity {
          * 4. Other Nodes are blue
          */
         traverseAndColorTheGraph(graph, graph.getNode(0), 2);
-        Log.d(TAG, "setupAdapter: "+dist);
-        for(int i = 0; i < dist.length; i++){
-            Log.d(TAG, "setupAdapter: "+i+"-"+dist[i]);
-        }
     }
 
     private void traverseAndColorTheGraph(Graph graph, Node rootNode, int target) {
         List<Node> x = graph.getNodes();
         List<Edge> y = graph.getEdges();
-        for(int i = 0; i < x.size(); ++i){
-            if(graph.getNode(i).getData() == rootNode.getData()){
-                if(!isVisited[i]){
-                    isVisited[i] = true;
-                    //dist[i] = nodeDist;
-                    Log.d(TAG, "traverse: " + rootNode.getData() + " visited "+ nodeDist);
-                    boolean bool = false;
-                    for(int j = 0; j < y.size(); j++) {
-                        if (y.get(j).getSource().getData() == rootNode.getData() && !isVisited[i + 1]) {
-                            bool = true;
-                            nodeDist++;
-                            traverseAndColorTheGraph(graph, y.get(j).getDestination(), target);
-                        }
-                    }
-                    if(!bool){
-                        nodeDist--;
-                        Log.d(TAG, "traverse: fungsi else jalan "+nodeDist);
-                        for(int j = 0; j < y.size(); j++) {
-                            if (y.get(j).getDestination().getData() == rootNode.getData() && isVisited[j]) {
-                               // nodeDist--;
-                                Log.d(TAG, "traverse: fungsi else dapet node sebelumnya " + nodeDist);
+        for(int i = 0; i < x.size(); i++) {
+            if(graph.getNode(i).getData() == rootNode.getData() && !isVisited[i]){
+                isVisited[i] = true;
+                dist[i] = nodeDist;
+                for(int j = 0; j < y.size(); j++) {
+                    if (y.get(j).getSource().getData() == rootNode.getData()) {
+                        for(int k = 0; k < x.size(); k++) {
+                            if (graph.getNode(k).getData() == y.get(j).getDestination().getData() && !isVisited[k]) {
+                                if(nodeDist < target){
+                                    nodeDist++;
+                                }
+                                traverseAndColorTheGraph(graph, y.get(j).getDestination(), target);
+                            } else if(graph.getNode(k).getData() == y.get(j).getSource().getData() && !isVisited[k]){
                                 traverseAndColorTheGraph(graph, y.get(j).getSource(), target);
                             }
                         }
-                    }
-                } else {
-                    Log.d(TAG, "traverse: fungsi pindah node jalan " + nodeDist);
-                    if(i+1 < x.size()) {
-                        //nodeDist--;
-                        if(isVisited[i+1]){
-                            Log.d(TAG, "traverse: fungsi if pindah node "+nodeDist);
-                            //nodeDist++;
-                            //traverseAndColorTheGraph(graph, graph.getNode(i + 1), target);
-                        } else {
-                            Log.d(TAG, "traverse: fungsi else pindah node " + nodeDist);
-                            //nodeDist++;
-                            //traverseAndColorTheGraph(graph, graph.getNode(i + 1), target);
-                        }
-                        traverseAndColorTheGraph(graph, graph.getNode(i + 1), target);
+                        nodeDist--;
                     }
                 }
             }

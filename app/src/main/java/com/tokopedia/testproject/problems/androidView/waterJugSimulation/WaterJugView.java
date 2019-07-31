@@ -17,7 +17,6 @@ public class WaterJugView extends View {
     private int waterFill = 0;
     private Rect mRect = new Rect();
     private Paint mPaint = new Paint();
-    private static final String TAG = "WaterJugView";
 
     public WaterJugView(Context context) {
         super(context);
@@ -44,18 +43,6 @@ public class WaterJugView extends View {
         this.waterFill = waterFill;
     }
 
-
-    public void drawJug(){
-        int selisih = 0;
-        if(maxWater != 0 && waterFill != 0){
-            selisih = waterFill * (getHeight()/maxWater);
-        }
-        mRect.left = 0;
-        mRect.top = getHeight()-selisih; //change for the height
-        mRect.right = getWidth();
-        mRect.bottom = getHeight();
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         // border
@@ -69,58 +56,14 @@ public class WaterJugView extends View {
         canvas.drawRect(mRect, mPaint);
     }
 
-    //TODO
-    /*
-    Based on these variables: maxWater and waterFill, draw the jug with the water
-
-    Example a:
-    maxWater = 10
-    waterFill = 0
-
-    Result,
-    View will draw like below
-    |        |
-    |        |
-    |        |
-    |        |
-    `--------'
-
-    Example b:
-    maxWater = 10
-    waterFill = 5
-
-    Result,
-    View will draw like below
-    |        |
-    |        |
-    |--------|
-    |        |
-    `--------'
-
-    Example c:
-    maxWater = 10
-    waterFill = 8
-
-    Result,
-    View will draw like below
-    |        |
-    |--------|
-    |        |
-    |        |
-    `--------'
-
-    Example d:
-    maxWater = 10
-    waterFill = 10
-
-    Result,
-    View will draw like below
-     ________
-    |        |
-    |        |
-    |        |
-    |        |
-    `--------'
-    */
-
+    public void drawJug(){
+        int selisih = 0;
+        if(maxWater != 0 && waterFill != 0){
+            selisih = waterFill * (getHeight()/maxWater);
+        }
+        mRect.left = 0;
+        mRect.top = getHeight()-selisih; //change for the height
+        mRect.right = getWidth();
+        mRect.bottom = getHeight();
+    }
 }
