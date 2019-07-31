@@ -9,7 +9,6 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 public class WaterJugView extends View {
@@ -18,8 +17,6 @@ public class WaterJugView extends View {
     private int waterFill = 0;
     private Rect mRect = new Rect();
     private Paint mPaint = new Paint();
-    private static int JUG_1_DIMENS = 100;
-    private static int JUG_2_DIMENS = 140;
     private static final String TAG = "WaterJugView";
 
     public WaterJugView(Context context) {
@@ -48,35 +45,28 @@ public class WaterJugView extends View {
     }
 
 
-    public void drawJug(int jug){
-        switch (jug){
-            case 1:
-                if(waterFill != 0 && maxWater != 0){
-                    //Log.d(TAG, "drawJug"+jug+": max="+maxWater+" fill"+waterFill+" percentage:" + maxWater/waterFill);
-                    mRect.left = JUG_1_DIMENS * (2/maxWater);
-                    mRect.top = JUG_1_DIMENS;
-                    mRect.right = mRect.left + JUG_1_DIMENS;
-                    mRect.bottom = mRect.top + JUG_1_DIMENS;
-                    mPaint.setColor(Color.BLUE);
-                }
-                break;
-            case 2:
-                if(waterFill != 0 && maxWater != 0) {
-                    Log.d(TAG, "drawJug"+jug+": max="+maxWater+" fill"+waterFill+" percentage:" + maxWater/waterFill);
-                    mRect.left = JUG_2_DIMENS * (waterFill/maxWater*100);
-                    mRect.top = JUG_2_DIMENS;
-                    mRect.right = mRect.left + JUG_2_DIMENS;
-                    mRect.bottom = mRect.top + JUG_2_DIMENS;
-                    mPaint.setColor(Color.GREEN);
-                }
-                break;
+    public void drawJug(){
+        int selisih = 0;
+        if(maxWater != 0 && waterFill != 0){
+            selisih = waterFill * (getHeight()/maxWater);
         }
-        postInvalidate();
+        mRect.left = 0;
+        mRect.top = getHeight()-selisih; //change for the height
+        mRect.right = getWidth();
+        mRect.bottom = getHeight();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawRect(mRect,mPaint);
+        // border
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(3);
+        mPaint.setColor(Color.BLACK);
+        canvas.drawRect(0,0,getWidth(), getHeight(), mPaint);
+        // fill
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(Color.BLUE);
+        canvas.drawRect(mRect, mPaint);
     }
 
     //TODO
