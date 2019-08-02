@@ -1,5 +1,7 @@
 package com.tokopedia.testproject.problems.news.presenter;
 
+import android.util.Log;
+
 import com.tokopedia.testproject.problems.news.model.Article;
 import com.tokopedia.testproject.problems.news.model.NewsResult;
 import com.tokopedia.testproject.problems.news.network.NewsDataSource;
@@ -20,6 +22,8 @@ public class NewsPresenter {
     private CompositeDisposable composite = new CompositeDisposable();
 
     private View view;
+
+    private static final String TAG = "NewsPresenter";
 
     public interface View {
         void onSuccessGetNews(List<Article> articleList);
@@ -43,12 +47,14 @@ public class NewsPresenter {
 
                     @Override
                     public void onNext(NewsResult newsResult) {
+                        Log.d(TAG, "onNext: start");
                         view.onSuccessGetNews(newsResult.getArticles());
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         view.onErrorGetNews(e);
+                        Log.d(TAG, "onError: start"+e.getCause());
                     }
 
                     @Override
