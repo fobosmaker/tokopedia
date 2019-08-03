@@ -46,7 +46,8 @@
         </activity>
 
         <activity android:name=".problems.androidView.slidingImagePuzzle.SlidingImageGameActivity"
-            android:label="@string/sliding_image_puzzle">
+            android:label="@string/sliding_image_puzzle"
+            android:configChanges="orientation|screenSize">
         </activity>
 
         <activity android:name=".problems.androidView.graphTraversal.GraphCaseActivity"

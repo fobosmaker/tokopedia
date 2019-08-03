@@ -1,6 +1,10 @@
 package com.tokopedia.testproject.problems.news.view;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
@@ -8,15 +12,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.tokopedia.testproject.R;
-import com.tokopedia.testproject.problems.news.model.Article;
 import com.tokopedia.testproject.problems.news.model.Banner;
 import com.tokopedia.testproject.problems.news.model.ButtonMore;
 import com.tokopedia.testproject.problems.news.model.NewArticle;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,18 +31,19 @@ import java.util.List;
 public class MainAdapter extends RecyclerView.Adapter {
     private NewsActivity context;
     private ArrayList<Object> list;
-    //private List<Article> newsData;
     private List<Banner> bannerData;
     private List<NewArticle> newsData;
     private final int menu_banner = 1;
     private final int menu_news = 2;
     private final int menu_button = 3;
+    private Boolean isScroll = false;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private NewArticleAdapter newArticleAdapter;
     private static final String TAG = "MainAdapter";
-    private boolean isScrollStatus = false;
-    private boolean isScrollNews = false;
 
-    public MainAdapter(List<NewArticle> newsData, List<Banner> bannerData, NewsActivity context) {
-        list = new ArrayList<>(3);
+
+    public MainAdapter(ArrayList<Object> list, List<NewArticle> newsData, List<Banner> bannerData, NewsActivity context) {
+        this.list = list;
         setNewsData(newsData);
         setBannerData(bannerData);
 
@@ -44,14 +52,12 @@ public class MainAdapter extends RecyclerView.Adapter {
 
     void setNewsData(List<NewArticle> newsData) {
         if(newsData.size() > 0) {
-            list.add(newsData.get(0));
             this.newsData = newsData;
         }
     }
 
     void setBannerData(List<Banner> bannerData){
         if(bannerData.size() > 0){
-            list.add(bannerData.get(0));
             this.bannerData = bannerData;
         }
     }
@@ -64,8 +70,9 @@ public class MainAdapter extends RecyclerView.Adapter {
         return list;
     }
 
+    @NotNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         View v;
         switch (viewType){
             case menu_news:
@@ -89,7 +96,8 @@ public class MainAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NotNull final RecyclerView.ViewHolder holder, final int position) {
+        Log.d(TAG, "onBindViewHolder: "+newsData.size());
         switch (holder.getItemViewType()){
             case menu_news:
                 NewsView((NewsViewholder)holder);
@@ -104,12 +112,15 @@ public class MainAdapter extends RecyclerView.Adapter {
     }
 
     private void NewsView(final NewsViewholder holder){
-        NewArticleAdapter adapter = new NewArticleAdapter(null);
-        holder.recyclerView.setAdapter(adapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, OrientationHelper.VERTICAL,false);
+        holder.recyclerView.setLayoutManager(linearLayoutManager);
+        newArticleAdapter = new NewArticleAdapter(null, context);
+        holder.recyclerView.setAdapter(newArticleAdapter);
         if(newsData.size() > 0){
+            Log.d(TAG, "NewsView: run with data "+newsData.size());
             holder.recyclerView.setVisibility(View.VISIBLE);
-            adapter.setNewArticleList(newsData);
-            adapter.notifyDataSetChanged();
+            newArticleAdapter.setNewArticleList(newsData);
+            newArticleAdapter.notifyDataSetChanged();
         } else {
             holder.recyclerView.setVisibility(View.GONE);
             context.showSnackbar("Empty Data");
@@ -118,9 +129,19 @@ public class MainAdapter extends RecyclerView.Adapter {
 
     private void BannerView(final BannerViewholder holder){
         final LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+        final int position = manager.findLastCompletelyVisibleItemPosition();
+        final Runnable SCROLLING_RUNNABLE = new Runnable() {
+            @Override
+            public void run() {
+                //holder.recyclerView.smoothScrollBy(30, 0);
+                holder.recyclerView.scrollToPosition(position);
+                createDotsBanner(position,holder.dotsLayout);
+                mHandler.postDelayed(this, 5000);
+            }
+        };
         holder.recyclerView.setLayoutManager(manager);
         holder.recyclerView.setHasFixedSize(true);
-        BannerAdapter adapter = new BannerAdapter(null);
+        final BannerAdapter adapter = new BannerAdapter(null);
         holder.recyclerView.setAdapter(adapter);
         if(bannerData.size() > 0){
             holder.recyclerView.setVisibility(View.VISIBLE);
@@ -133,33 +154,41 @@ public class MainAdapter extends RecyclerView.Adapter {
         SnapHelper snapHelper = new PagerSnapHelper();
         holder.recyclerView.setOnFlingListener(null);
         snapHelper.attachToRecyclerView(holder.recyclerView);
-        /*holder.arrow.setOnClickListener(new View.OnClickListener() {
+        createDotsBanner(0,holder.dotsLayout);
+        holder.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onClick(View view) {
-                context.onMore("gomudikNews");
-            }
-        });*/
-        /*MenuGoMudikNewsAdapter adapter = new MenuGoMudikNewsAdapter(context.getPlylst().body().getItems(), context);
-        holder.recyclerView.setAdapter(adapter);*/
-        //createDotsNews(0,holder.dotsLayout,5);
-        /*holder.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NotNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (isScrollNews && manager.findLastCompletelyVisibleItemPosition() >= 0) {
-                    Log.d(TAG, "onScrolled: position "+manager.findLastCompletelyVisibleItemPosition());
-                    createDotsNews(manager.findLastCompletelyVisibleItemPosition(), holder.dotsLayout, 5);
-                }
+                /*if(isScroll){
+                    if(manager.findLastCompletelyVisibleItemPosition() >= 0){
+                        createDotsBanner(manager.findLastCompletelyVisibleItemPosition(), holder.dotsLayout);
+                    }
+                } else {*/
+                    if(position == manager.getItemCount()-1){
+                        mHandler.removeCallbacks(SCROLLING_RUNNABLE);
+                        Handler postHandler = new Handler();
+                        postHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                holder.recyclerView.setAdapter(null);
+                                holder.recyclerView.setAdapter(adapter);
+                                createDotsBanner(position, holder.dotsLayout);
+                                mHandler.postDelayed(SCROLLING_RUNNABLE, 5000);
+                            }
+                        }, 5000);
+                    }
+                    mHandler.postDelayed(SCROLLING_RUNNABLE,5000);
+                //}
             }
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NotNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-                    isScrollNews = true;
+                    isScroll = true;
                 }
             }
 
-        });*/
+        });
     }
 
     private void MoreView(final MoreViewholder holder, final int position){
@@ -202,13 +231,11 @@ public class MainAdapter extends RecyclerView.Adapter {
 
     private class BannerViewholder extends RecyclerView.ViewHolder{
         private RecyclerView recyclerView;
-        //private ImageButton arrow;
-        //private LinearLayout dotsLayout;
+        private LinearLayout dotsLayout;
         private BannerViewholder(View itemView){
             super(itemView);
             recyclerView = itemView.findViewById(R.id.recyclerView);
-            //arrow = itemView.findViewById(R.id.arrow);
-            //dotsLayout = itemView.findViewById(R.id.dotsLayout);
+            dotsLayout = itemView.findViewById(R.id.dotsLayout);
         }
     }
 
@@ -226,5 +253,35 @@ public class MainAdapter extends RecyclerView.Adapter {
         private defaultViewholder(View itemView){
             super(itemView);
         }
+    }
+
+    private void createDotsBanner(int position, LinearLayout dotsLayout){
+        int limit = 5;
+        if(dotsLayout != null){
+            dotsLayout.removeAllViews();
+        }
+        ImageView[] dots = new ImageView[limit];
+        for (int i = 0; i < limit; i++) {
+            dots[i] = new ImageView(context);
+            if (i == position) {
+                dots[i].setImageDrawable(ContextCompat.getDrawable(context, R.drawable.circle_active));
+            } else {
+                dots[i].setImageDrawable(ContextCompat.getDrawable(context, R.drawable.circle_default));
+            }
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(4, 0, 4, 0);
+
+            //assert dotsLayout != null;
+            dotsLayout.addView(dots[i], params);
+        }
+    }
+
+    public void searchFilter(List<NewArticle> data){
+        Log.d(TAG, "searchFilter: Before Search "+newsData.size());
+        Log.d(TAG, "searchFilter: total "+data.size());
+        setNewsData(data);
+        Log.d(TAG, "searchFilter: After search "+newsData.size());
+        newArticleAdapter.notifyDataSetChanged();
     }
 }

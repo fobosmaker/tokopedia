@@ -1,14 +1,15 @@
 package com.tokopedia.testproject.problems.news.view;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.tokopedia.testproject.R;
 import com.tokopedia.testproject.problems.news.model.Article;
 import com.tokopedia.testproject.problems.news.model.NewArticle;
@@ -18,9 +19,12 @@ import java.util.List;
 
 public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.NewArticleViewHolder> {
     private List<NewArticle> articleList;
+    private NewsAdapter newsAdapter;
+    private Context context;
 
-    NewArticleAdapter(List<NewArticle> articleList) {
+    NewArticleAdapter(List<NewArticle> articleList, Context context) {
         setNewArticleList(articleList);
+        this.context = context;
     }
 
     void setNewArticleList(List<NewArticle> articleList) {
@@ -39,14 +43,7 @@ public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.Ne
 
     @Override
     public void onBindViewHolder(@NonNull NewArticleViewHolder holder, int i) {
-        if(articleList.get(i).getArticles() != null && articleList.get(i).getArticles().size() > 0){
-            holder.textPublishedDate.setText(articleList.get(i).getPublishedDate());
-            NewsAdapter newsAdapter = new NewsAdapter(null);
-            holder.recyclerView.setAdapter(newsAdapter);
-            List<Article> data = articleList.get(i).getArticles();
-            newsAdapter.setArticleList(data);
-            newsAdapter.notifyDataSetChanged();
-        }
+        holder.bind(articleList.get(i));
     }
 
     @Override
@@ -64,18 +61,19 @@ public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.Ne
             textPublishedDate = itemView.findViewById(R.id.textPublishedDate);
         }
 
-       /* void bind(NewArticle article) {
-            textPublishedDate.setText(article.getPublishedDate());
-            NewsAdapter adapter = new NewArticleAdapter(null);
-            recyclerView.setAdapter(adapter);
-            if(article.getArticles() != null && article.getArticles().size() > 0){
-                List<Article> data = article.getArticles();
-                adapter.setArticleList(data);
-                adapter.notifyDataSetChanged();
-            } else {
-                holder.recyclerView.setVisibility(View.GONE);
-                context.showSnackbar("Empty Data");
+        void bind(NewArticle article){
+            if(article.getArticles()!=null){
+                if(article.getArticles().size() > 0){
+                    textPublishedDate.setText(article.getPublishedDate());
+                    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, OrientationHelper.VERTICAL,false);
+                    recyclerView.setLayoutManager(linearLayoutManager);
+                    newsAdapter = new NewsAdapter(null);
+                    recyclerView.setAdapter(newsAdapter);
+                    List<Article> data = article.getArticles();
+                    newsAdapter.setArticleList(data);
+                    newsAdapter.notifyDataSetChanged();
+                }
             }
-        }*/
+        }
     }
 }
