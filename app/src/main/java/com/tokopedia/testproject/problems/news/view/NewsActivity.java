@@ -1,31 +1,31 @@
 package com.tokopedia.testproject.problems.news.view;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.tokopedia.testproject.R;
 import com.tokopedia.testproject.problems.news.model.Article;
-import com.tokopedia.testproject.problems.news.model.Source;
+import com.tokopedia.testproject.problems.news.model.Banner;
+import com.tokopedia.testproject.problems.news.model.ButtonMore;
+import com.tokopedia.testproject.problems.news.model.NewArticle;
 import com.tokopedia.testproject.problems.news.presenter.NewsPresenter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -34,24 +34,49 @@ import java.util.Locale;
 public class NewsActivity extends AppCompatActivity implements com.tokopedia.testproject.problems.news.presenter.NewsPresenter.View {
 
     private NewsPresenter newsPresenter;
-    private NewsAdapter newsAdapter;
-    private LoadingDialog loading;
-    private GetDataNews mGetDataNews;
+    //private NewsAdapter newsAdapter;
+    private GetDataBaner mGetDataBanner;
     private RecyclerView recyclerView;
-    private DataStore mDataStore;
+    //private DataStore mDataStore;
+    private MainAdapter adapter;
+    private LinearLayoutManager linearLayoutManager;
+    private List<Banner> bannerData = new ArrayList<>();
+    //private List<Article> newsData = new ArrayList<>();
+    private List<NewArticle> newsData = new ArrayList<>();
     private static final String TAG = "NewsActivity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news);
-        newsPresenter = new NewsPresenter(this);
-        newsAdapter = new NewsAdapter(null);
+        newsPresenter = new NewsPresenter(this, NewsActivity.this);
+        //newsAdapter = new NewsAdapter(null);
+        //recyclerView.setAdapter(newsAdapter);
         recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setAdapter(newsAdapter);
-        loading = new LoadingDialog();
-        mDataStore = new DataStore(NewsActivity.this);
-        mDataStore.clearData();
+        adapter = new MainAdapter(newsData,bannerData,NewsActivity.this);
+        linearLayoutManager = new LinearLayoutManager(this, OrientationHelper.VERTICAL,false);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if(linearLayoutManager.findFirstVisibleItemPosition() > 0){
+                    Log.d(TAG, "onScrolled: menu pertama hilang");
+                    //buttonBackToTop.setVisibility(View.GONE);
+                }
+
+                if(linearLayoutManager.getChildCount()+linearLayoutManager.findFirstVisibleItemPosition() == linearLayoutManager.getItemCount()){
+                    Log.d(TAG, "onScrolled: abis");
+                    //buttonBackToTop.setVisibility(View.GONE);
+                } else {
+                    Log.d(TAG, "onScrolled: masi sisa "+(linearLayoutManager.getItemCount()-linearLayoutManager.getChildCount()-linearLayoutManager.findFirstVisibleItemPosition()));
+                    //buttonBackToTop.setVisibility(View.GONE);
+                }
+                Log.d(TAG, "onScrolled: "+linearLayoutManager.getChildCount()+" "+linearLayoutManager.findFirstVisibleItemPosition());
+            }
+        });
         init();
     }
 
@@ -61,26 +86,35 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
     }
 
     @Override
-    public void onSuccessGetNews(List<Article> articleList) {
-        Log.d(TAG, "onSuccessGetNews: get data success");
-        mDataStore.storeData(articleList);
-        newsAdapter.setArticleList(mDataStore.getData());
-        newsAdapter.notifyDataSetChanged();
-        loading.dismiss();
+    public void onSuccessGetNewsFormat(List<NewArticle> newArticleList) {
+        newsData = newArticleList;
+        checkData();
     }
 
     @Override
-    public void onErrorGetNews(Throwable throwable) {
-        //Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
-        List<Article> data = mDataStore.getData();
-        Log.d(TAG, "onSuccessGetNews: data from sp:"+data.size());
-        if(data.size() == 0){
-            showSnackbar(throwable.getMessage());
-        } else {
-            newsAdapter.setArticleList(data);
-            newsAdapter.notifyDataSetChanged();
+    public void onErrorGetNewsFormat(Throwable t) {
+        showSnackbar(t.getMessage());
+    }
+
+    @Override
+    public void onSuccessGetBanner(List<Banner> bannerList) {
+        bannerData = bannerList;
+        checkData();
+    }
+
+    @Override
+    public void onErrorGetBanner(Throwable t) {
+        showSnackbar(t.getMessage());
+    }
+
+    public void checkData(){
+        if(newsData.size() > 0 && bannerData.size() > 0){
+            adapter.setBannerData(bannerData);
+            adapter.setNewsData(newsData);
+            adapter.setMenu_button(new ButtonMore("Load More"));
+            adapter.notifyDataSetChanged();
+            showLoading(false);
         }
-        loading.dismiss();
     }
 
     @Override
@@ -90,9 +124,23 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
     }
 
     public void init(){
-        //call AsyncTask
-        mGetDataNews = new GetDataNews("android");
-        mGetDataNews.execute();
+       /* mGetDataBanner = new GetDataBaner("id","technology");
+        mGetDataBanner.execute();*/
+        //loading.show(getSupportFragmentManager(),"loading");
+        showLoading(true);
+        newsPresenter.getHeadline("id","technology");
+        newsPresenter.getEverything("android");
+    }
+
+    private void showLoading(Boolean bool){
+        ProgressBar pb = findViewById(R.id.progressBar);
+        if(bool){
+            pb.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            pb.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     public void showSnackbar(String message){
@@ -106,27 +154,29 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
         snackbar.show();
     }
 
-    public class GetDataNews extends AsyncTask<Void,Void,Boolean> {
+    public void moreNews(){
+        newsPresenter.getEverything("android");
+    }
 
-        private String keyword;
+    public class GetDataBaner extends AsyncTask<Void,Void,Boolean> {
+        private Integer type;
 
-        private GetDataNews(String keyword){
-            this.keyword = keyword;
+        public GetDataBaner(Integer type){
+            this.type = type;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            loading.show(getSupportFragmentManager(),"Loading");
+            //loading.show(getSupportFragmentManager(),"Loading");
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
             try {
                 // Simulate network access.
-                Thread.sleep(1000);
-                Log.d(TAG, "doInBackground: start");
-                newsPresenter.getEverything(keyword);
+                Thread.sleep(3000);
+                Log.d(TAG, "doInBackground: type "+type+" is running");
             } catch (InterruptedException e) {
                 return false;
             }
@@ -136,113 +186,35 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
         @Override
         protected void onPostExecute(Boolean success) {
             super.onPostExecute(success);
-            Log.d(TAG, "onPostExecute: start");
-            mGetDataNews = null;
+            mGetDataBanner = null;
+            if(success){
+                Log.d(TAG, "onPostExecute: type: "+type+" finish!");
+            } else {
+                showLoading(false);
+                showSnackbar("Failed to get data, try again");
+                //Toast.makeText(CCTVActivity.this, "Failed to get data, try again", Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
         protected void onCancelled() {
             super.onCancelled();
-            mGetDataNews = null;
+            mGetDataBanner = null;
+            showLoading(false);
         }
     }
 
-    public static class LoadingDialog extends DialogFragment {
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the Builder class for convenient dialog construction
-            if(getActivity()!= null){
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                LayoutInflater inflater = getActivity().getLayoutInflater();
-                View dialogView = inflater.inflate(R.layout.loading_progress, null);
-                builder.setView(dialogView);
-                return builder.create();
-            } else {
-                return null;
-            }
+    private Date formatDate(String date){
+        Date returnDate = new Date("31 Ju");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH);
+        try {
+            //Date dateNow = dateFormat.parse(date);
+            returnDate =  dateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.d(TAG, "putData: "+e.getMessage());
+            //return date;
         }
-
-        @Override
-        public void onDismiss(final DialogInterface dialog) {
-            super.onDismiss(dialog);
-            final Activity activity = getActivity();
-            if (activity instanceof DialogInterface.OnDismissListener) {
-                ((DialogInterface.OnDismissListener) activity).onDismiss(dialog);
-            }
-        }
-    }
-
-    public class DataStore {
-        private SharedPreferences sp;
-        private SharedPreferences.Editor editor;
-        private Context _context;
-
-        private final String SHARE_NAME = "Data Session";
-        private final int MODE_PRIVATE = 0;
-
-        private DataStore(Context context){
-            this._context = context;
-            sp = context.getSharedPreferences(SHARE_NAME, MODE_PRIVATE);
-            editor = sp.edit();
-        }
-
-        private void storeData(List<Article> data){
-            List<Article> prevData = getData();
-            if(prevData.size() == 0){
-                editor.putInt("article_size",data.size());
-                for(int i = 0; i < data.size(); i++){
-                    putData(data.get(i), i);
-                }
-            } else{
-                for(int i = 0; i < data.size(); i++){
-                    if(!prevData.get(i).equals(data.get(i))){
-                        putData(data.get(i),i);
-                    }
-                }
-            }
-            editor.apply();
-        }
-
-        private List<Article> getData() {
-            int size = sp.getInt("article_size",0);
-            List<Article> datax = new ArrayList<>();
-            for(int i = 0; i < size; i++){
-                datax.add(new Article(new Source("",""),
-                        "",
-                        sp.getString("getTitle_"+i,null),
-                        sp.getString("getDescription_"+i,null),
-                        "",
-                        sp.getString("getUrlToImage_"+i,null),
-                        sp.getString("getPublishedAt_"+i,null),
-                        ""));
-            }
-            return datax;
-        }
-
-        private void putData(Article data, int i){
-            editor.putString("getTitle_"+i, data.getTitle());
-            editor.putString("getDescription_"+i, data.getDescription());
-            editor.putString("getPublishedAt_"+i, formatDate(data.getPublishedAt()).toString());
-            editor.putString("getUrlToImage_"+i, data.getUrlToImage());
-        }
-
-        private String formatDate(String date){
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-            try {
-                Date dateNow = dateFormat.parse(date);
-                SimpleDateFormat newFormat = new SimpleDateFormat("dd MMMM yyyy",Locale.ENGLISH);
-                return newFormat.format(dateNow);
-            } catch (ParseException e) {
-                e.printStackTrace();
-                Log.d(TAG, "putData: "+e.getMessage());
-                return date;
-            }
-        }
-
-        private void clearData(){
-            editor.clear();
-            editor.apply();
-        }
+        return returnDate;
     }
 }

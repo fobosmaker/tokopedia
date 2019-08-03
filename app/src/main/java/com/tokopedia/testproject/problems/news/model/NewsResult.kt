@@ -24,7 +24,6 @@ data class Source(
         val name: String)
 
 data class Article(
-
         @SerializedName("source")
         @Expose
         val source: Source? = null,
@@ -49,3 +48,25 @@ data class Article(
         @SerializedName("content")
         @Expose
         val content: String? = null)
+
+data class Banner(
+        @SerializedName("title")
+        @Expose
+        val title: String? = null,
+        @SerializedName("urlToImage")
+        @Expose
+        val urlToImage: String? = null)
+
+data class ButtonMore(
+        @SerializedName("title")
+        @Expose
+        val title: String? = null)
+
+data class NewArticle(
+        @SerializedName("publishedAt")
+        @Expose
+        val publishedDate: String,
+        @SerializedName("articles")
+        @Expose
+        val articles: List<Article>? = null
+)
