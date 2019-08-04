@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -15,10 +14,7 @@ import android.widget.Toast;
 
 import com.tokopedia.testproject.R;
 
-import java.util.List;
-
 import de.blox.graphview.BaseGraphAdapter;
-import de.blox.graphview.Edge;
 import de.blox.graphview.Graph;
 import de.blox.graphview.GraphView;
 import de.blox.graphview.Node;
@@ -28,7 +24,6 @@ public class GraphActivity extends AppCompatActivity {
     private int nodeCount = 1;
     private Node currentNode;
     protected BaseGraphAdapter<ViewHolder> adapter;
-    private static final String TAG = "GraphActivity";
     private static boolean[] isVisited;
     private static int[] dist;
     private int nodeDist = 0;
@@ -45,17 +40,14 @@ public class GraphActivity extends AppCompatActivity {
         }
 
         dist = new int[graph.getNodeCount()];
-        dist[0] = 0;
-        dist[1] = 1;
-        dist[2] = 1;
-        dist[3] = 2;
-        dist[4] = 2;
-        dist[5] = 2;
-        dist[6] = 2;
+        for (int i = 0; i < isVisited.length; i++){
+            dist[i] = 99; //random value initiation
+        }
+
         setupAdapter(graph);
     }
 
-    private void setupAdapter(Graph graph) {
+    private void setupAdapter(final Graph graph) {
         final GraphView graphView = findViewById(R.id.graph2);
 
         adapter = new BaseGraphAdapter<ViewHolder>(this, R.layout.node, graph) {
@@ -68,16 +60,15 @@ public class GraphActivity extends AppCompatActivity {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, Object data, int position) {
                 viewHolder.textView.setText(data.toString());
-                Log.d(TAG, "onBindViewHolder: "+position);
                 switch (dist[position]){
                     case 0:
-                        viewHolder.cardView.setBackgroundColor(Color.RED);
+                        viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.purple));
                         break;
                     case 1:
-                        viewHolder.cardView.setBackgroundColor(Color.YELLOW);
+                        viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                         break;
                     case 2:
-                        viewHolder.cardView.setBackgroundColor(Color.GREEN);
+                        viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.orange));
                         break;
                     default:
                         viewHolder.cardView.setBackgroundColor(Color.BLUE);
@@ -111,32 +102,40 @@ public class GraphActivity extends AppCompatActivity {
          * 3. Nodes with the distance are equal to the target distance are colored orange
          * 4. Other Nodes are blue
          */
-        traverseAndColorTheGraph(graph, graph.getNode(0), 2);
+        traverseAndColorTheGraph(graph, graph.getNode(4), 2);
     }
 
-    private void traverseAndColorTheGraph(Graph graph, Node rootNode, int target) {
-        List<Node> x = graph.getNodes();
-        List<Edge> y = graph.getEdges();
-        for(int i = 0; i < x.size(); i++) {
-            if(graph.getNode(i).getData() == rootNode.getData() && !isVisited[i]){
-                isVisited[i] = true;
-                dist[i] = nodeDist;
-                for(int j = 0; j < y.size(); j++) {
-                    if (y.get(j).getSource().getData() == rootNode.getData()) {
-                        for(int k = 0; k < x.size(); k++) {
-                            if (graph.getNode(k).getData() == y.get(j).getDestination().getData() && !isVisited[k]) {
-                                if(nodeDist < target){
+    void traverseAndColorTheGraph(Graph graph, Node rootNode, int target) {
+        for(int i = 0; i < graph.getNodeCount(); i++) {
+            if(nodeDist <= target){
+                if(graph.getNode(i).getData() == rootNode.getData() && !isVisited[i]){
+                    isVisited[i] = true;
+                    dist[i] = nodeDist;
+                    //search the next node
+                    for(int j = 0; j < graph.getEdges().size(); j++) {
+                        if (graph.getEdges().get(j).getSource().getData() == rootNode.getData()) {
+                            for(int k = 0; k < graph.getNodeCount(); k++) {
+                                if (graph.getNode(k).getData() == graph.getEdges().get(j).getDestination().getData() && !isVisited[k]) {
                                     nodeDist++;
+                                    traverseAndColorTheGraph(graph, graph.getEdges().get(j).getDestination(), target);
                                 }
-                                traverseAndColorTheGraph(graph, y.get(j).getDestination(), target);
-                            } else if(graph.getNode(k).getData() == y.get(j).getSource().getData() && !isVisited[k]){
-                                traverseAndColorTheGraph(graph, y.get(j).getSource(), target);
                             }
                         }
-                        nodeDist--;
+                    }
+                    //if the next node hasn't be found, move to previous node
+                    for(int j = 0; j < graph.getEdges().size(); j++) {
+                        if (graph.getEdges().get(j).getDestination().getData() == rootNode.getData()) {
+                            for(int k = 0; k < graph.getNodeCount(); k++) {
+                                if (graph.getNode(k).getData() == graph.getEdges().get(j).getSource().getData()) {
+                                    if(!isVisited[k]) nodeDist++;
+                                    else  nodeDist--;
+                                    traverseAndColorTheGraph(graph, graph.getEdges().get(j).getSource(), target);
+                                }
+                            }
+                        }
                     }
                 }
-            }
+            } else { break; }
         }
     }
 
