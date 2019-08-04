@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.GridLayout android:id="@+id/gridLayout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:grid="http://schemas.android.com/apk/res-auto"
-    android:layout_marginTop="16dp"
-    grid:columnCount="4">
-
-</android.support.v7.widget.GridLayout>
+<RelativeLayout android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.widget.GridLayout android:id="@+id/gridLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        xmlns:grid="http://schemas.android.com/apk/res-auto"
+        android:layout_marginTop="16dp"
+        grid:columnCount="4"
+        android:layout_centerHorizontal="true">
+    </android.support.v7.widget.GridLayout>
+    <ImageView android:id="@+id/fullImage"
+        android:layout_below="@id/gridLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:layout_centerHorizontal="true"/>
+</RelativeLayout>
