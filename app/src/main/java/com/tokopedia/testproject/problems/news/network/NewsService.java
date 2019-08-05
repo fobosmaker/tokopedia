@@ -9,7 +9,8 @@ import retrofit2.http.Query;
 
 public interface NewsService {
     @GET("everything")
-    Observable<NewsResult> getEverything(@Query("q") String query);
+    Observable<NewsResult> getEverything(@Query("q") String query,
+                                         @Query("sortBy") String sortBy);
 
     @GET("top-headlines")
     Observable<NewsResult> getHeadline(@Query("country") String country,

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +20,8 @@ import java.util.List;
 
 public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.NewArticleViewHolder> {
     private List<NewArticle> articleList;
-    private NewsAdapter newsAdapter;
     private Context context;
+    private static final String TAG = "NewArticleAdapter";
 
     NewArticleAdapter(List<NewArticle> articleList, Context context) {
         setNewArticleList(articleList);
@@ -43,6 +44,7 @@ public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.Ne
 
     @Override
     public void onBindViewHolder(@NonNull NewArticleViewHolder holder, int i) {
+        Log.d(TAG, "onBindViewHolder: "+articleList.size());
         holder.bind(articleList.get(i));
     }
 
@@ -67,7 +69,7 @@ public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.Ne
                     textPublishedDate.setText(article.getPublishedDate());
                     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, OrientationHelper.VERTICAL,false);
                     recyclerView.setLayoutManager(linearLayoutManager);
-                    newsAdapter = new NewsAdapter(null);
+                    NewsAdapter newsAdapter = new NewsAdapter(null);
                     recyclerView.setAdapter(newsAdapter);
                     List<Article> data = article.getArticles();
                     newsAdapter.setArticleList(data);
