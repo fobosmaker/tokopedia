@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import java.util.List;
 public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.NewArticleViewHolder> {
     private List<NewArticle> articleList;
     private Context context;
-    private static final String TAG = "NewArticleAdapter";
 
     NewArticleAdapter(List<NewArticle> articleList, Context context) {
         setNewArticleList(articleList);
@@ -29,24 +27,16 @@ public class NewArticleAdapter extends RecyclerView.Adapter<NewArticleAdapter.Ne
     }
 
     void setNewArticleList(List<NewArticle> articleList) {
-        if (articleList == null) {
-            this.articleList = new ArrayList<>();
-        } else {
-            this.articleList = articleList;
-        }
+        if (articleList == null) this.articleList = new ArrayList<>();
+        else this.articleList = articleList;
     }
 
     @NonNull
     @Override
-    public NewArticleViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        return new NewArticleViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.menu_article, viewGroup, false));
-    }
+    public NewArticleViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) { return new NewArticleViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.menu_article, viewGroup, false)); }
 
     @Override
-    public void onBindViewHolder(@NonNull NewArticleViewHolder holder, int i) {
-        Log.d(TAG, "onBindViewHolder: "+articleList.size());
-        holder.bind(articleList.get(i));
-    }
+    public void onBindViewHolder(@NonNull NewArticleViewHolder holder, int i) { holder.bind(articleList.get(i)); }
 
     @Override
     public int getItemCount() {

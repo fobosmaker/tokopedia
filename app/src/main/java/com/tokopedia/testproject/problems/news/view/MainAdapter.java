@@ -6,7 +6,6 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +34,6 @@ public class MainAdapter extends RecyclerView.Adapter {
     private final int menu_news = 2;
     private final int menu_button = 3;
     Boolean isScroll = false;
-    private static final String TAG = "MainAdapter";
     private static int curPos = 0;
 
     public MainAdapter(ArrayList<Object> list, List<NewArticle> newsData, List<Banner> bannerData, NewsActivity context) {
@@ -45,13 +43,9 @@ public class MainAdapter extends RecyclerView.Adapter {
         this.context = context;
     }
 
-    void setNewsData(List<NewArticle> newsData) {
-        if(newsData.size() > 0) this.newsData = newsData;
-    }
+    void setNewsData(List<NewArticle> newsData) { if(newsData.size() > 0) this.newsData = newsData; }
 
-    void setBannerData(List<Banner> bannerData){
-        if(bannerData.size() > 0) this.bannerData = bannerData;
-    }
+    void setBannerData(List<Banner> bannerData){ if(bannerData.size() > 0) this.bannerData = bannerData; }
 
     public ArrayList<Object> getList(){
         return list;
@@ -92,7 +86,6 @@ public class MainAdapter extends RecyclerView.Adapter {
         NewArticleAdapter newArticleAdapter = new NewArticleAdapter(null, context);
         holder.recyclerView.setAdapter(newArticleAdapter);
         if(newsData.size() > 0){
-            Log.d(TAG, "NewsView: run with data "+newsData.size());
             holder.recyclerView.setVisibility(View.VISIBLE);
             newArticleAdapter.setNewArticleList(newsData);
             newArticleAdapter.notifyDataSetChanged();
@@ -124,13 +117,11 @@ public class MainAdapter extends RecyclerView.Adapter {
                         createDotsBanner(lm.findLastCompletelyVisibleItemPosition(), holder.dotsLayout);
                         curPos = lm.findLastCompletelyVisibleItemPosition();
                     }
-                    Log.d(TAG, "onScrollStateChanged: scroll "+isScroll);
                 }
                 @Override
                 public void onScrollStateChanged(@NotNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
                     isScroll = newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
-                    Log.d(TAG, "onScrollStateChanged: scroll "+isScroll);
                 }
             });
             context.startSlidingBanner(holder.recyclerView, holder.dotsLayout);
@@ -146,11 +137,7 @@ public class MainAdapter extends RecyclerView.Adapter {
         holder.buttonText.setText(data.getTitle());
         holder.buttonMore.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                //holder.buttonMore.setVisibility(View.GONE);
-                //list.remove(position);
-                context.moreNews();
-            }
+            public void onClick(View v) { context.moreNews(); }
         });
     }
 
@@ -195,11 +182,7 @@ public class MainAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private class defaultViewholder extends RecyclerView.ViewHolder{
-        private defaultViewholder(View itemView){
-            super(itemView);
-        }
-    }
+    private class defaultViewholder extends RecyclerView.ViewHolder{ private defaultViewholder(View itemView){ super(itemView); }}
 
     private void createDotsBanner(int position, LinearLayout dotsLayout){
         int limit = 5;

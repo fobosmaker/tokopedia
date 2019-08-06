@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.tokopedia.testproject.R;
 import com.tokopedia.testproject.problems.news.model.Article;
@@ -41,6 +42,10 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
     private Thread mThread;
     private Handler mHandler = new Handler();
     private boolean isSlide = false;
+    private static String DEFAULT_KEYWORD = "android";
+    private static String DEFAULT_LANGUAGE = "id";
+    private static String DEFAULT_SORT = "publishedAt";
+    private static Integer DEFAULT_PAGE = 1;
     private static final String TAG = "NewsActivity";
 
     @Override
@@ -63,7 +68,6 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
                 init();
             }
         });
-        //Log.d(TAG, "Thread: "+mThread.isAlive());
         init();
     }
 
@@ -87,9 +91,8 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
                         List<Article> data = newsData.get(i).getArticles();
                         if(data!=null){
                             for(int j = 0; j < data.size(); j++){
-                                if(data.get(j).getTitle().toLowerCase().contains(newText.toLowerCase()) || data.get(j).getDescription().toLowerCase().contains(newText.toLowerCase())){
+                                if(data.get(j).getTitle().toLowerCase().contains(newText.toLowerCase()) || data.get(j).getDescription().toLowerCase().contains(newText.toLowerCase()))
                                     temp.add(data.get(j));
-                                }
                             }
                         }
                         if(temp.size() > 0) search.add(new NewArticle(newsData.get(i).getPublishedDate(),temp));
@@ -105,9 +108,18 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
 
     @Override
     public void onSuccessGetNewsFormat(List<NewArticle> newArticleList) {
-        newsData = newArticleList;
-        ds.storeDataNews(newsData);
-        checkData();
+        if(newArticleList.size() > 0){
+            newsData = newArticleList;
+            ds.storeDataNews(newsData);
+            checkData();
+        } else {
+            List<NewArticle> data = ds.getDataNews();
+            if(data.size() > 0){
+                Toast.makeText(this, "Couldn't update your feed, check your connection", Toast.LENGTH_SHORT).show();
+                newsData = data;
+                checkData();
+            } else showSnackbar("No data Found");
+        }
     }
 
     @Override
@@ -115,19 +127,26 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
         //check sp
         List<NewArticle> data = ds.getDataNews();
         if(data.size() > 0){
+            Toast.makeText(this, "Couldn't update your feed, check your connection", Toast.LENGTH_SHORT).show();
             newsData = data;
             checkData();
-        } else {
-            showSnackbar(t.getMessage());
-            showProgress(false);
-        }
+        } else showSnackbar(t.getMessage());
     }
 
     @Override
     public void onSuccessGetBanner(List<Banner> bannerList) {
-        bannerData = bannerList;
-        ds.storeDataBanner(bannerData);
-        checkData();
+        if(bannerList.size() > 0){
+            bannerData = bannerList;
+            ds.storeDataBanner(bannerData);
+            checkData();
+        } else {
+            Toast.makeText(this, "Couldn't update your feed, check your connection", Toast.LENGTH_SHORT).show();
+            List<Banner> data = ds.getDataBanner();
+            if(data.size() > 0){
+                bannerData = data;
+                checkData();
+            } else showSnackbar("No data found");
+        }
     }
 
     @Override
@@ -135,31 +154,30 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
         //check sp
         List<Banner> data = ds.getDataBanner();
         if(data.size() > 0){
+            Toast.makeText(this, "Couldn't update your feed, check your connection", Toast.LENGTH_SHORT).show();
             bannerData = data;
             checkData();
-        } else {
-            showSnackbar(t.getMessage());
-            showProgress(false);
-        }
+        } else showSnackbar(t.getMessage());
     }
 
     @Override
     public void onSuccessGetMoreNews(List<NewArticle> newArticleList) {
-        int size = newsData.size();
-        for(int i = 0; i < size; i++){
-            if(newsData.get(i).getPublishedDate().equalsIgnoreCase(newArticleList.get(i).getPublishedDate())){
-                List<Article> data = newArticleList.get(i).getArticles();
-                if(data != null) newsData.get(i).getArticles().addAll(data);
-            } else newsData.add(newArticleList.get(i));
-        }
-        adapter.notifyDataSetChanged();
-        showProgress(false);
+        if(newArticleList.size() > 0){
+            int size = newsData.size();
+            for(int i = 0; i < size; i++){
+                if(i >= newArticleList.size()) break;
+                if(newsData.get(i).getPublishedDate().equalsIgnoreCase(newArticleList.get(i).getPublishedDate())){
+                    List<Article> articleList = newArticleList.get(i).getArticles();
+                    if(articleList != null) newsData.get(i).getArticles().addAll(articleList);
+                } else newsData.add(newArticleList.get(i));
+            }
+            adapter.notifyDataSetChanged();
+            showProgress(false);
+        } else showSnackbar("No data found");
     }
 
     @Override
-    public void onErrorGetMoreNews(Throwable t) {
-        showSnackbar(t.getMessage());
-    }
+    public void onErrorGetMoreNews(Throwable t) { showSnackbar(t.getMessage()); }
 
     public void checkData(){
         if(newsData.size() > 0 && bannerData.size() > 0){
@@ -185,10 +203,11 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
     public void init(){
         showProgress(true);
         stopSlideBanner();
+        DEFAULT_PAGE = 1;
         if(newsData.size() > 0) newsData.clear();
         if(bannerData.size() > 0) bannerData.clear();
-        newsPresenter.getHeadline("id","technology");
-        newsPresenter.getEverything("android","publishedAt");
+        newsPresenter.getHeadline(DEFAULT_LANGUAGE,"technology",5);
+        newsPresenter.getEverything(DEFAULT_KEYWORD,DEFAULT_SORT,DEFAULT_LANGUAGE,DEFAULT_PAGE);
     }
 
     public void showProgress(Boolean show){
@@ -205,11 +224,13 @@ public class NewsActivity extends AppCompatActivity implements com.tokopedia.tes
             }
         });
         snackbar.show();
+        if(swipeRefresh.isRefreshing()) showProgress(false);
     }
 
     public void moreNews(){
         showProgress(true);
-        newsPresenter.getMoreNews("bitcoin","publishedAt");
+        DEFAULT_PAGE+=1;
+        newsPresenter.getMoreNews(DEFAULT_KEYWORD,DEFAULT_SORT,DEFAULT_LANGUAGE,DEFAULT_PAGE);
     }
 
     public void startSlidingBanner(final RecyclerView rv, final LinearLayout dots){

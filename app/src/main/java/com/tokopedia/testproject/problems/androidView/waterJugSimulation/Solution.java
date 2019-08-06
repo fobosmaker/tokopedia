@@ -26,25 +26,19 @@ public class Solution {
         fillJug(list2, 0, 0, target,2);
 
         Log.d(TAG, "size: from jug1("+list.size()+") | from jug2("+list2.size()+"):");
-        if(list.size() == 0 && list2.size() == 0){
-            return new ArrayList<>();
-        } else {
-            if(list.size() > list2.size()){
-                return list2;
-            } else {
-                return list;
-            }
+        if(list.size() == 0 && list2.size() == 0) return new ArrayList<>();
+        else {
+            if(list.size() > list2.size()) return list2;
+            else return list;
         }
     }
 
     private static void fillJug(List<WaterJugAction> list, int jug1, int jug2, int target, int isJug){
         switch (isJug){
-            case 1:
-                jug1 = jug1Cap;
+            case 1: jug1 = jug1Cap;
                 list.add(new WaterJugAction(WaterJugActionEnum.FILL,1));
                 break;
-            case 2:
-                jug2 = jug2Cap;
+            case 2: jug2 = jug2Cap;
                 list.add(new WaterJugAction(WaterJugActionEnum.FILL,2));
                 break;
         }
@@ -54,8 +48,7 @@ public class Solution {
     private static void pourJug(List<WaterJugAction> list, int jug1, int jug2, int target, int isJug){
         int jumlah = jug1+jug2;
         switch (isJug){
-            case 1:
-                list.add(new WaterJugAction(WaterJugActionEnum.POUR, 2));
+            case 1: list.add(new WaterJugAction(WaterJugActionEnum.POUR, 2));
                 if(jumlah < jug2Cap){
                     jug2 =  jumlah;
                     jug1 = 0;
@@ -64,15 +57,11 @@ public class Solution {
                     jug1 =  jumlah-jug2;
                 }
                 if(jug2 != target){
-                    if(jug2 == jug2Cap){
-                        emptyJug(list,jug1,jug2,target,isJug);
-                    } else{
-                        fillJug(list,jug1,jug2,target,isJug);
-                    }
+                    if(jug2 == jug2Cap) emptyJug(list,jug1,jug2,target,isJug);
+                    else fillJug(list,jug1,jug2,target,isJug);
                 }
                 break;
-            case 2:
-                list.add(new WaterJugAction(WaterJugActionEnum.POUR, 1));
+            case 2: list.add(new WaterJugAction(WaterJugActionEnum.POUR, 1));
                 if(jumlah < jug1Cap){
                     jug1 = jumlah;
                     jug2 = jumlah - jug1;
@@ -80,13 +69,9 @@ public class Solution {
                     jug1 = jug1Cap;
                     jug2 = jumlah - jug1;
                 }
-
                 if(jug2 != target){
-                    if(jug1 == jug1Cap){
-                        emptyJug(list,jug1,jug2,target,isJug);
-                    } else {
-                        fillJug(list,jug1,jug2,target,isJug);
-                    }
+                    if(jug1 == jug1Cap) emptyJug(list,jug1,jug2,target,isJug);
+                    else fillJug(list,jug1,jug2,target,isJug);
                 }
                 break;
         }
@@ -94,12 +79,10 @@ public class Solution {
 
     private static void emptyJug(List<WaterJugAction> list, int jug1, int jug2, int target, int isJug){
         switch (isJug){
-            case 1:
-                jug2 = 0;
+            case 1: jug2 = 0;
                 list.add(new WaterJugAction(WaterJugActionEnum.EMPTY, 2));
                 break;
-            case 2:
-                jug1 = 0;
+            case 2: jug1 = 0;
                 list.add(new WaterJugAction(WaterJugActionEnum.EMPTY, 1));
                 break;
         }

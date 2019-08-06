@@ -23,23 +23,16 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     }
 
     void setArticleList(List<Article> articleList) {
-        if (articleList == null) {
-            this.articleList = new ArrayList<>();
-        } else {
-            this.articleList = articleList;
-        }
+        if (articleList == null) this.articleList = new ArrayList<>();
+        else this.articleList = articleList;
     }
 
     @NonNull
     @Override
-    public NewsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        return new NewsViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_news, viewGroup, false));
-    }
+    public NewsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) { return new NewsViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_news, viewGroup, false)); }
 
     @Override
-    public void onBindViewHolder(@NonNull NewsViewHolder newsViewHolder, int i) {
-        newsViewHolder.bind(articleList.get(i));
-    }
+    public void onBindViewHolder(@NonNull NewsViewHolder newsViewHolder, int i) { newsViewHolder.bind(articleList.get(i)); }
 
     @Override
     public int getItemCount() {

@@ -27,9 +27,7 @@ public class Solution {
                 if(countLength > 1){
                     expandSquare(i,j);
                     arrResult.add(countRect);
-                } else {
-                    arrResult.add(0);
-                }
+                } else arrResult.add(0);
                 countLength = 0;
                 countRect = 0;
             }
@@ -51,9 +49,9 @@ public class Solution {
     private static void expandSquare(int i, int j){
         if(i < matrix.length){
             ArrayList<Integer> rowTemp = new ArrayList<>();
-            for(int k = j; k < countLength+j; k++){
+            for(int k = j; k < countLength+j; k++)
                 rowTemp.add(matrix[i][k]);
-            }
+
             if(!rowTemp.contains(0)){
                 countRect+=rowTemp.size();
                 expandSquare(i+1,j);

@@ -58,9 +58,7 @@ public class WaterJugView extends View {
 
     public void drawJug(){
         int selisih = 0;
-        if(maxWater != 0 && waterFill != 0){
-            selisih = waterFill * (getHeight()/maxWater);
-        }
+        if(maxWater != 0 && waterFill != 0) selisih = waterFill * (getHeight()/maxWater);
         mRect.left = 0;
         mRect.top = getHeight()-selisih; //change for the height
         mRect.right = getWidth();

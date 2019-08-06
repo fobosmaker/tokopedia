@@ -1,7 +1,5 @@
 package com.tokopedia.testproject.problems.news.presenter;
 
-import android.util.Log;
-
 import com.tokopedia.testproject.problems.news.model.Article;
 import com.tokopedia.testproject.problems.news.model.Banner;
 import com.tokopedia.testproject.problems.news.model.NewArticle;
@@ -30,8 +28,6 @@ public class NewsPresenter {
 
     private View view;
 
-    private static final String TAG = "NewsPresenter";
-
     public interface View {
 
         void onSuccessGetNewsFormat(List<NewArticle> newArticleList);
@@ -51,8 +47,8 @@ public class NewsPresenter {
         this.view = view;
     }
 
-    public void getEverything(String keyword, String sortBy) {
-        NewsDataSource.getService().getEverything(keyword, sortBy)
+    public void getEverything(String keyword, String sortBy, String language, Integer page) {
+        NewsDataSource.getService().getEverything(keyword, sortBy, language,page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<NewsResult>() {
@@ -63,7 +59,8 @@ public class NewsPresenter {
 
                     @Override
                     public void onNext(NewsResult newsResult) {
-                        view.onSuccessGetNewsFormat(normalizeData(newsResult.getArticles()));
+                        if(newsResult.getArticles() != null && newsResult.getStatus().equalsIgnoreCase("ok"))
+                            view.onSuccessGetNewsFormat(normalizeData(newsResult.getArticles()));
                     }
 
                     @Override
@@ -72,14 +69,12 @@ public class NewsPresenter {
                     }
 
                     @Override
-                    public void onComplete() {
-
-                    }
+                    public void onComplete() { }
                 });
     }
 
-    public void getHeadline(String country, String category) {
-        NewsDataSource.getService().getHeadline(country, category)
+    public void getHeadline(String country, String category, Integer pageSize) {
+        NewsDataSource.getService().getHeadline(country, category, pageSize)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<NewsResult>() {
@@ -90,7 +85,8 @@ public class NewsPresenter {
 
                     @Override
                     public void onNext(NewsResult newsResult) {
-                        view.onSuccessGetBanner(getBanner(newsResult.getArticles()));
+                        if(newsResult.getArticles() != null && newsResult.getStatus().equalsIgnoreCase("ok"))
+                            view.onSuccessGetBanner(getBanner(newsResult.getArticles()));
                     }
 
                     @Override
@@ -99,14 +95,12 @@ public class NewsPresenter {
                     }
 
                     @Override
-                    public void onComplete() {
-
-                    }
+                    public void onComplete() { }
                 });
     }
 
-    public void getMoreNews(String keyword, String sortBy) {
-        NewsDataSource.getService().getEverything(keyword, sortBy)
+    public void getMoreNews(String keyword, String sortBy, String language, Integer page) {
+        NewsDataSource.getService().getEverything(keyword, sortBy, language, page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<NewsResult>() {
@@ -117,7 +111,8 @@ public class NewsPresenter {
 
                     @Override
                     public void onNext(NewsResult newsResult) {
-                        view.onSuccessGetMoreNews(normalizeData(newsResult.getArticles()));
+                        if(newsResult.getArticles() != null && newsResult.getStatus().equalsIgnoreCase("ok"))
+                            view.onSuccessGetMoreNews(normalizeData(newsResult.getArticles()));
                     }
 
                     @Override
@@ -126,9 +121,7 @@ public class NewsPresenter {
                     }
 
                     @Override
-                    public void onComplete() {
-
-                    }
+                    public void onComplete() { }
                 });
     }
 
@@ -144,39 +137,15 @@ public class NewsPresenter {
         List<String> dateArticleTemp = new ArrayList<>();
         for(int i = 0; i < data.size(); i++){
             String date = formatDate(data.get(i).getPublishedAt());
-            if(!dateArticleTemp.contains(date)){
-                dateArticleTemp.add(date);
-            }
+            if(!dateArticleTemp.contains(date)) dateArticleTemp.add(date);
         }
-
-        /*//sort data from the newest
-        for(int i = 0; i < dateArticleTemp.size(); i++){
-            for(int j = 0; j < dateArticleTemp.size(); j++){
-                if(i!=j) {
-                    try {
-                        SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy",Locale.ENGLISH);
-                        Date a = format.parse(dateArticleTemp.get(i));
-                        Date b = format.parse(dateArticleTemp.get(j));
-                        if (a.after(b)) {
-                            String temp = dateArticleTemp.get(i);
-                            dateArticleTemp.set(i, dateArticleTemp.get(j));
-                            dateArticleTemp.set(j, temp);
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }*/
 
         //create new structure for news data
         for(int i = 0; i < dateArticleTemp.size(); i++){
             List<Article> dataArticleTemp = new ArrayList<>();
             for(int j = 0; j < data.size(); j++){
-                if(dateArticleTemp.get(i).equalsIgnoreCase(formatDate(data.get(j).getPublishedAt()))){
-                    Article data2 = new Article(data.get(j).getSource(),data.get(j).getAuthor(),data.get(j).getTitle(),data.get(j).getDescription(),data.get(j).getUrl(),data.get(j).getUrlToImage(),formatDate(data.get(j).getPublishedAt()),data.get(j).getContent());
-                    dataArticleTemp.add(data2);
-                }
+                if(dateArticleTemp.get(i).equalsIgnoreCase(formatDate(data.get(j).getPublishedAt())))
+                    dataArticleTemp.add(new Article(data.get(j).getSource(),data.get(j).getAuthor(),data.get(j).getTitle(),data.get(j).getDescription(),data.get(j).getUrl(),data.get(j).getUrlToImage(),formatDate(data.get(j).getPublishedAt()),data.get(j).getContent()));
             }
             newData.add(i,new NewArticle(dateArticleTemp.get(i),dataArticleTemp));
         }
@@ -185,9 +154,8 @@ public class NewsPresenter {
 
     private List<Banner> getBanner(List<Article> data){
         List<Banner> bannerData = new ArrayList<>();
-        for (int i = 0; i < 5; i++){
+        for (int i = 0; i < data.size(); i++)
             bannerData.add(new Banner(data.get(i).getTitle(),data.get(i).getUrlToImage()));
-        }
         return bannerData;
     }
 
@@ -199,10 +167,7 @@ public class NewsPresenter {
             return newFormat.format(dateNow);
         } catch (ParseException e) {
             e.printStackTrace();
-            Log.d(TAG, "putData: "+e.getMessage());
             return date;
         }
     }
-
-
 }

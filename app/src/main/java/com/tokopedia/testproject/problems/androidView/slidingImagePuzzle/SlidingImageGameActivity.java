@@ -76,8 +76,7 @@ public class SlidingImageGameActivity extends AppCompatActivity {
 
             @Override
             public void onSliceFailed(String message) {
-                Toast.makeText(SlidingImageGameActivity.this,
-                        message, Toast.LENGTH_LONG).show();
+                Toast.makeText(SlidingImageGameActivity.this, message, Toast.LENGTH_LONG).show();
             }
         }, imageUrl);
 
@@ -113,7 +112,6 @@ public class SlidingImageGameActivity extends AppCompatActivity {
             if (counter >= limit) break;
         }
         defaultArray[3][3] = BLANK;
-        //goalArray = defaultArray;
     }
 
     private void shufflePuzzle(){
@@ -148,11 +146,8 @@ public class SlidingImageGameActivity extends AppCompatActivity {
     private void drawPuzzle(){
         for (int i = 0; i < GRID_NO; i++) {
             for (int j = 0; j < GRID_NO; j++) {
-                if(defaultArray[i][j] == BLANK){
-                    imageViews[i][j].setImageDrawable(null);
-                } else {
-                    imageViews[i][j].setImageBitmap(bitmap.get(defaultArray[i][j]));
-                }
+                if(defaultArray[i][j] == BLANK) imageViews[i][j].setImageDrawable(null);
+                else imageViews[i][j].setImageBitmap(bitmap.get(defaultArray[i][j]));
             }
         }
     }
@@ -165,10 +160,10 @@ public class SlidingImageGameActivity extends AppCompatActivity {
                 //top
                 if(!move(row,col,row-1,col)){
                     //bottom
-                    if(move(row,col,row+1,col)){ isFinished(); }
-                } else { isFinished(); }
-            } else { isFinished(); }
-        } else { isFinished(); }
+                    if(move(row,col,row+1,col)) isFinished();
+                } else isFinished();
+            } else isFinished();
+        } else isFinished();
     }
 
     private Boolean move(int x, int y, int newX, int newY){
@@ -180,12 +175,8 @@ public class SlidingImageGameActivity extends AppCompatActivity {
                 imageViews[newX][newY].setImageBitmap(bitmap.get(defaultArray[newX][newY]));
                 imageViews[x][y].setImageDrawable(null);
                 return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+            } else  return false;
+        } else  return false;
     }
 
     private void isFinished(){

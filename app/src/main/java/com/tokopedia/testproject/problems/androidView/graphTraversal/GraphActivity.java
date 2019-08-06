@@ -35,14 +35,13 @@ public class GraphActivity extends AppCompatActivity {
 
         final Graph graph = createGraph();
         isVisited = new boolean[graph.getNodeCount()];
-        for (int i = 0; i < isVisited.length; i++){
+        for (int i = 0; i < isVisited.length; i++)
             isVisited[i] = false;
-        }
+
 
         dist = new int[graph.getNodeCount()];
-        for (int i = 0; i < isVisited.length; i++){
+        for (int i = 0; i < isVisited.length; i++)
             dist[i] = 99; //random value initiation
-        }
 
         setupAdapter(graph);
     }
@@ -61,19 +60,14 @@ public class GraphActivity extends AppCompatActivity {
             public void onBindViewHolder(ViewHolder viewHolder, Object data, int position) {
                 viewHolder.textView.setText(data.toString());
                 switch (dist[position]){
-                    case 0:
-                        viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.purple));
+                    case 0: viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.purple));
                         break;
-                    case 1:
-                        viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    case 1: viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                         break;
-                    case 2:
-                        viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.orange));
+                    case 2: viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.orange));
                         break;
-                    default:
-                        viewHolder.cardView.setBackgroundColor(Color.BLUE);
+                    default: viewHolder.cardView.setBackgroundColor(Color.BLUE);
                         break;
-
                 }
             }
         };
@@ -102,7 +96,7 @@ public class GraphActivity extends AppCompatActivity {
          * 3. Nodes with the distance are equal to the target distance are colored orange
          * 4. Other Nodes are blue
          */
-        traverseAndColorTheGraph(graph, graph.getNode(4), 2);
+        traverseAndColorTheGraph(graph, graph.getNode(0), 2);
     }
 
     void traverseAndColorTheGraph(Graph graph, Node rootNode, int target) {
@@ -135,7 +129,7 @@ public class GraphActivity extends AppCompatActivity {
                         }
                     }
                 }
-            } else { break; }
+            } else break;
         }
     }
 

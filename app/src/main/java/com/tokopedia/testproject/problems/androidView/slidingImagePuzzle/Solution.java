@@ -27,17 +27,12 @@ public class Solution {
     private static void sliceTo4x4(Bitmap bitmap, onSuccessLoadBitmap onSuccessLoadBitmap){
         if(bitmap != null){
             int SIDE_LENGTH = 400;
-            if(bitmap.getWidth()== SIDE_LENGTH && bitmap.getHeight() == SIDE_LENGTH){
-                onSuccessLoadBitmap.onSliceSuccess(generateBitmap(bitmap), bitmap);
-            } else if(bitmap.getWidth() > SIDE_LENGTH && bitmap.getHeight() > SIDE_LENGTH){
+            if(bitmap.getWidth()== SIDE_LENGTH && bitmap.getHeight() == SIDE_LENGTH) onSuccessLoadBitmap.onSliceSuccess(generateBitmap(bitmap), bitmap);
+            else if(bitmap.getWidth() > SIDE_LENGTH && bitmap.getHeight() > SIDE_LENGTH){
                 Bitmap resized = Bitmap.createScaledBitmap(bitmap, SIDE_LENGTH, SIDE_LENGTH, true);
                 onSuccessLoadBitmap.onSliceSuccess(generateBitmap(resized),resized);
-            } else {
-                onSuccessLoadBitmap.onSliceFailed("Your downloaded image is too small, please download with min. 400x400");
-            }
-        } else {
-            onSuccessLoadBitmap.onSliceFailed("Failed download image");
-        }
+            } else onSuccessLoadBitmap.onSliceFailed("Your downloaded image is too small, please download with min. 400x400");
+        } else onSuccessLoadBitmap.onSliceFailed("Failed download image");
     }
 
     private static ArrayList<Bitmap> generateBitmap(Bitmap bitmap){

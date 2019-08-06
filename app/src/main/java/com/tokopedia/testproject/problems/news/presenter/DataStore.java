@@ -25,9 +25,7 @@ public class DataStore {
     private static final String KEY_BANNER_TITLE = "bannerTitle_";
     private static final String KEY_BANNER_URL = "bannerURL_";
 
-    public DataStore(Context context){
-        sp = context.getSharedPreferences("Data Session", 0);
-    }
+    public DataStore(Context context){ sp = context.getSharedPreferences("Data Session", 0); }
 
     public void storeDataNews(List<NewArticle> data){
         if(data.size() > 0){
@@ -59,17 +57,14 @@ public class DataStore {
                 int limitArticle = sp.getInt(KEY_NEWS_SIZE+i,0);
                 if(limitArticle > 0){
                     List<Article> dataArticle = new ArrayList<>();
-                    for(int j = 0; j < limitArticle; j++){
+                    for(int j = 0; j < limitArticle; j++)
                         dataArticle.add(new Article(new Source("",""),"", sp.getString(KEY_NEWS_TITLE+i+j,null), sp.getString(KEY_NEWS_DESCRIPTION+i+j,null), "", sp.getString(KEY_NEWS_URL+i+j,null), sp.getString(KEY_NEWS_PUBLISHED+i+j,null), ""));
-                    }
                     if(date != null)
                         data.add(new NewArticle(date,dataArticle));
                 }
             }
             return data;
-        } else {
-            return new ArrayList<>();
-        }
+        } else return new ArrayList<>();
     }
 
     public void storeDataBanner(List<Banner> data){
@@ -89,14 +84,9 @@ public class DataStore {
         int size = sp.getInt(KEY_BANNER_SIZE,0);
         if(size > 0){
             List<Banner> data = new ArrayList<>();
-            for(int i = 0; i < size; i++){
-                data.add(new Banner(sp.getString(KEY_BANNER_TITLE+i,null),
-                        sp.getString(KEY_BANNER_URL+i,null)
-                ));
-            }
+            for(int i = 0; i < size; i++)
+                data.add(new Banner(sp.getString(KEY_BANNER_TITLE+i,null), sp.getString(KEY_BANNER_URL+i,null)));
             return data;
-        } else {
-            return new ArrayList<>();
-        }
+        } else return new ArrayList<>();
     }
 }
