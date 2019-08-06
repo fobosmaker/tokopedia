@@ -17,7 +17,9 @@ class WaterJugItemView(context: Context) : FrameLayout(context) {
         tv_desription.setText(text)
         water_jug1.setMaxWater(jug1Max)
         water_jug1.setWaterFill(jug1)
+        water_jug1.drawJug()
         water_jug2.setMaxWater(jug2Max)
         water_jug2.setWaterFill(jug2)
+        water_jug2.drawJug()
     }
 }

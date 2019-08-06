@@ -2,16 +2,21 @@ package com.tokopedia.testproject.problems.androidView.waterJugSimulation;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-
 public class WaterJugView extends View {
 
     private int maxWater = 0;
     private int waterFill = 0;
+    private Rect mRect = new Rect();
+    private Paint mPaint = new Paint();
 
     public WaterJugView(Context context) {
         super(context);
@@ -38,58 +43,25 @@ public class WaterJugView extends View {
         this.waterFill = waterFill;
     }
 
-    //TODO
-    /*
-    Based on these variables: maxWater and waterFill, draw the jug with the water
+    @Override
+    protected void onDraw(Canvas canvas) {
+        // border
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(3);
+        mPaint.setColor(Color.BLACK);
+        canvas.drawRect(0,0,getWidth(), getHeight(), mPaint);
+        // fill
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(Color.BLUE);
+        canvas.drawRect(mRect, mPaint);
+    }
 
-    Example a:
-    maxWater = 10
-    waterFill = 0
-
-    Result,
-    View will draw like below
-    |        |
-    |        |
-    |        |
-    |        |
-    `--------'
-
-    Example b:
-    maxWater = 10
-    waterFill = 5
-
-    Result,
-    View will draw like below
-    |        |
-    |        |
-    |--------|
-    |        |
-    `--------'
-
-    Example c:
-    maxWater = 10
-    waterFill = 8
-
-    Result,
-    View will draw like below
-    |        |
-    |--------|
-    |        |
-    |        |
-    `--------'
-
-    Example d:
-    maxWater = 10
-    waterFill = 10
-
-    Result,
-    View will draw like below
-     ________
-    |        |
-    |        |
-    |        |
-    |        |
-    `--------'
-    */
-
+    public void drawJug(){
+        int selisih = 0;
+        if(maxWater != 0 && waterFill != 0) selisih = waterFill * (getHeight()/maxWater);
+        mRect.left = 0;
+        mRect.top = getHeight()-selisih; //change for the height
+        mRect.right = getWidth();
+        mRect.bottom = getHeight();
+    }
 }

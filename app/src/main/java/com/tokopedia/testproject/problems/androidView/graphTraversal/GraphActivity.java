@@ -1,5 +1,6 @@
 package com.tokopedia.testproject.problems.androidView.graphTraversal;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -23,6 +24,9 @@ public class GraphActivity extends AppCompatActivity {
     private int nodeCount = 1;
     private Node currentNode;
     protected BaseGraphAdapter<ViewHolder> adapter;
+    private static boolean[] isVisited;
+    private static int[] dist;
+    private int nodeDist = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +34,19 @@ public class GraphActivity extends AppCompatActivity {
         setContentView(R.layout.activity_graph);
 
         final Graph graph = createGraph();
+        isVisited = new boolean[graph.getNodeCount()];
+        for (int i = 0; i < isVisited.length; i++)
+            isVisited[i] = false;
+
+
+        dist = new int[graph.getNodeCount()];
+        for (int i = 0; i < isVisited.length; i++)
+            dist[i] = 99; //random value initiation
+
         setupAdapter(graph);
     }
 
-    private void setupAdapter(Graph graph) {
+    private void setupAdapter(final Graph graph) {
         final GraphView graphView = findViewById(R.id.graph2);
 
         adapter = new BaseGraphAdapter<ViewHolder>(this, R.layout.node, graph) {
@@ -46,6 +59,16 @@ public class GraphActivity extends AppCompatActivity {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, Object data, int position) {
                 viewHolder.textView.setText(data.toString());
+                switch (dist[position]){
+                    case 0: viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.purple));
+                        break;
+                    case 1: viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                        break;
+                    case 2: viewHolder.cardView.setBackgroundColor(getResources().getColor(R.color.orange));
+                        break;
+                    default: viewHolder.cardView.setBackgroundColor(Color.BLUE);
+                        break;
+                }
             }
         };
 
@@ -73,12 +96,41 @@ public class GraphActivity extends AppCompatActivity {
          * 3. Nodes with the distance are equal to the target distance are colored orange
          * 4. Other Nodes are blue
          */
-
         traverseAndColorTheGraph(graph, graph.getNode(0), 2);
     }
 
-    private void traverseAndColorTheGraph(Graph graph, Node rootNode, int target) {
-
+    void traverseAndColorTheGraph(Graph graph, Node rootNode, int target) {
+        for(int i = 0; i < graph.getNodeCount(); i++) {
+            if(nodeDist <= target){
+                if(graph.getNode(i).getData() == rootNode.getData() && !isVisited[i]){
+                    isVisited[i] = true;
+                    dist[i] = nodeDist;
+                    //search the next node
+                    for(int j = 0; j < graph.getEdges().size(); j++) {
+                        if (graph.getEdges().get(j).getSource().getData() == rootNode.getData()) {
+                            for(int k = 0; k < graph.getNodeCount(); k++) {
+                                if (graph.getNode(k).getData() == graph.getEdges().get(j).getDestination().getData() && !isVisited[k]) {
+                                    nodeDist++;
+                                    traverseAndColorTheGraph(graph, graph.getEdges().get(j).getDestination(), target);
+                                }
+                            }
+                        }
+                    }
+                    //if the next node hasn't be found, move to previous node
+                    for(int j = 0; j < graph.getEdges().size(); j++) {
+                        if (graph.getEdges().get(j).getDestination().getData() == rootNode.getData()) {
+                            for(int k = 0; k < graph.getNodeCount(); k++) {
+                                if (graph.getNode(k).getData() == graph.getEdges().get(j).getSource().getData()) {
+                                    if(!isVisited[k]) nodeDist++;
+                                    else  nodeDist--;
+                                    traverseAndColorTheGraph(graph, graph.getEdges().get(j).getSource(), target);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else break;
+        }
     }
 
     @Override
